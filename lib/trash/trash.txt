@@ -1,0 +1,81 @@
+  Future<void> searchLocation(String query) async {
+    final dio = Dio();
+    final apiKey = '6f795637429a4a2fb9f8bd5ffebe7221';
+    final url = 'https://api.opencagedata.com/geocode/v1/json';
+
+    try {
+      final response = await dio.get(
+        url,
+        queryParameters: {
+          'q': query,
+          'key': apiKey,
+          'language': 'en',
+          'pretty': 1,
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final data = response.data;
+
+        if (data['results'].isNotEmpty) {
+          double latitude = data['results'][0]['geometry']['lat'];
+          double longitude = data['results'][0]['geometry']['lng'];
+          print('Latitude: $latitude, Longitude: $longitude');
+
+          setState(() {
+            end_location = LatLng(latitude, longitude);
+          });
+
+          _mapController.move(
+            end_location!,
+            10.0, // Zoom level
+          );
+        } else {
+          print("No results found");
+        }
+      } else {
+        throw Exception('Failed to load location: ${response.statusCode}');
+      }
+    } catch (e) {
+      print('Error fetching location: $e');
+    }
+  }
+
+  // Future<void> searchLocation(String query) async {
+  //   searching = true;
+
+  //   try {
+  //     final response = await dio.get(
+  //       'https://nominatim.openstreetmap.org/search',
+  //       queryParameters: {
+  //         'format': 'json',
+  //         'q': query,
+  //       },
+  //     );
+
+  //     if (response.statusCode == 200) {
+  //       final data = response.data;
+
+  //       if (data.isNotEmpty) {
+  //         double latitude = double.parse(data[0]['lat']);
+  //         double longitude = double.parse(data[0]['lon']);
+  //         print('Latitude: $latitude, Longitude: $longitude');
+
+  //         setState(() {
+  //           end_location = LatLng(latitude, longitude);
+  //         });
+
+  //         _mapController.move(
+  //           end_location!,
+  //           10.0, // Zoom level
+  //         );
+  //       } else {
+  //         print("No results found");
+  //       }
+  //     } else {
+  //       throw Exception('Failed to load location: ${response.statusCode}');
+  //     }
+  //   } catch (e) {
+  //     print('Error fetching location: $e');
+  //   }
+  // }

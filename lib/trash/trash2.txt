@@ -1,0 +1,738 @@
+// // import 'package:flutter/material.dart';
+// // import 'package:flutter_map/flutter_map.dart';
+// // import 'package:latlong2/latlong.dart';
+
+// // void main() {
+// //   runApp(const MyApp());
+// // }
+
+// // class MyApp extends StatelessWidget {
+// //   const MyApp({super.key});
+
+// //   @override
+// //   Widget build(BuildContext context) {
+// //     return MaterialApp(
+// //       debugShowCheckedModeBanner: false,
+// //       home: Scaffold(
+// //         appBar: AppBar(
+// //           title: const Text('OpenStreetMap Example'),
+// //           centerTitle: true,
+// //         ),
+// //         body: const OSMMap(),
+// //       ),
+// //     );
+// //   }
+// // }
+
+// // class OSMMap extends StatelessWidget {
+// //   const OSMMap({super.key});
+
+// //   @override
+// //   Widget build(BuildContext context) {
+// //     return FlutterMap(
+// //       options: MapOptions(
+// //         initialCenter: LatLng(21.0285, 105.8542),
+// //         initialZoom: 13.0,
+// //       ),
+// //       children: [
+// //         TileLayer(
+// //           urlTemplate: "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+// //           subdomains: ['a', 'b', 'c'],
+// //           // attributionBuilder: (_) {
+// //           //   return const Text("© OpenStreetMap contributors");
+// //           // },
+// //         ),
+// //         MarkerLayer(
+// //           markers: [
+// //             Marker(
+// //               width: 80.0,
+// //               height: 80.0,
+// //               point: LatLng(21.0285, 105.8542), // Hà Nội
+
+// //               child: const Icon(
+// //                 Icons.location_pin,
+// //                 color: Colors.red,
+// //                 size: 40,
+// //               ),
+// //             ),
+// //           ],
+// //         ),
+// //       ],
+// //     );
+// //   }
+// // }
+// // import 'dart:convert';
+// // import 'package:flutter/material.dart';
+// // import 'package:flutter_map/flutter_map.dart';
+// // import 'package:http/http.dart' as http;
+// // import 'package:latlong2/latlong.dart';
+
+// // void main() {
+// //   runApp(const MyApp());
+// // }
+
+// // class MyApp extends StatelessWidget {
+// //   const MyApp({super.key});
+
+// //   @override
+// //   Widget build(BuildContext context) {
+// //     return MaterialApp(
+// //       debugShowCheckedModeBanner: false,
+// //       home: Scaffold(
+// //         appBar: AppBar(
+// //           title: const Text('OpenStreetMap Routing Example'),
+// //           centerTitle: true,
+// //         ),
+// //         body: const OSMMap(),
+// //       ),
+// //     );
+// //   }
+// // }
+
+// // class OSMMap extends StatefulWidget {
+// //   const OSMMap({super.key});
+
+// //   @override
+// //   State<OSMMap> createState() => _OSMMapState();
+// // }
+
+// // class _OSMMapState extends State<OSMMap> {
+// //   List<LatLng> routePoints = [];
+
+// //   Future<void> fetchRoute() async {
+// //     const start = '105.8542,21.0285'; // Hà Nội
+// //     const end = '106.1748,20.4371'; // Nam Định
+// //     const url =
+// //         'https://router.project-osrm.org/route/v1/driving/$start;$end?overview=full&geometries=geojson';
+
+// //     try {
+// //       final response = await http.get(Uri.parse(url));
+
+// //       if (response.statusCode == 200) {
+// //         final data = jsonDecode(response.body);
+// //         final geometry = data['routes'][0]['geometry']['coordinates'];
+
+// //         setState(() {
+// //           // Chuyển đổi danh sách tọa độ GeoJSON sang danh sách LatLng
+// //           routePoints = geometry
+// //               .map<LatLng>((point) => LatLng(point[1], point[0]))
+// //               .toList();
+// //         });
+// //       } else {
+// //         debugPrint('Error: ${response.statusCode}');
+// //       }
+// //     } catch (e) {
+// //       debugPrint('Error fetching route: $e');
+// //     }
+// //   }
+
+// //   @override
+// //   Widget build(BuildContext context) {
+// //     return Stack(
+// //       children: [
+// //         FlutterMap(
+// //           options: MapOptions(
+// //             initialCenter: LatLng(21.0285, 105.8542), // Hà Nội
+// //             initialZoom: 8.0,
+// //           ),
+// //           children: [
+// //             TileLayer(
+// //               urlTemplate: "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+// //               subdomains: ['a', 'b', 'c'],
+// //             ),
+// //             MarkerLayer(
+// //               markers: [
+// //                 Marker(
+// //                   width: 80.0,
+// //                   height: 80.0,
+// //                   point: LatLng(21.0285, 105.8542), // Hà Nội
+// //                   child: const Icon(
+// //                     Icons.location_pin,
+// //                     color: Colors.red,
+// //                     size: 40,
+// //                   ),
+// //                 ),
+// //                 Marker(
+// //                   width: 80.0,
+// //                   height: 80.0,
+// //                   point: LatLng(20.4371, 106.1748), // Nam Định
+// //                   child: const Icon(
+// //                     Icons.location_pin,
+// //                     color: Colors.blue,
+// //                     size: 40,
+// //                   ),
+// //                 ),
+// //               ],
+// //             ),
+// //             if (routePoints.isNotEmpty)
+// //               PolylineLayer(
+// //                 polylines: [
+// //                   Polyline(
+// //                     points: routePoints,
+// //                     color: Colors.green,
+// //                     strokeWidth: 5.0,
+// //                   ),
+// //                 ],
+// //               ),
+// //           ],
+// //         ),
+// //         Positioned(
+// //           bottom: 20,
+// //           right: 20,
+// //           child: FloatingActionButton(
+// //             onPressed: fetchRoute,
+// //             child: const Icon(Icons.route),
+// //           ),
+// //         ),
+// //       ],
+// //     );
+// //   }
+// // }
+
+// import 'dart:async';
+// import 'dart:convert';
+// import 'dart:io';
+// import 'package:flutter/material.dart';
+// import 'package:flutter_map/flutter_map.dart';
+// import 'package:geolocator/geolocator.dart';
+// import 'package:latlong2/latlong.dart';
+// import 'package:mymap/search_bar.dart';
+// import 'package:permission_handler/permission_handler.dart';
+// import 'package:http/http.dart' as http;
+// import 'package:dio/dio.dart';
+// //import 'package:flutter_map_tile_caching/flutter_map_tile_caching.dart';
+// //import 'package:flutter_cache_manager/flutter_cache_manager.dart';
+// import 'package:path_provider/path_provider.dart';
+// import 'package:flutter_map_cache/flutter_map_cache.dart';
+// import 'package:hive/hive.dart';
+// import 'package:hive_flutter/hive_flutter.dart';
+// import 'dart:io';
+
+// import 'package:dio_cache_interceptor/dio_cache_interceptor.dart';
+// import 'package:dio_cache_interceptor_file_store/dio_cache_interceptor_file_store.dart';
+// import 'package:flutter/material.dart';
+// import 'package:flutter_map/flutter_map.dart';
+// import 'package:flutter_map_cache/flutter_map_cache.dart';
+// import 'package:path_provider/path_provider.dart';
+// void main() async {
+//   WidgetsFlutterBinding.ensureInitialized();
+//   // Ensure widgets are initialized
+//   WidgetsFlutterBinding.ensureInitialized();
+
+//   // Initialize Hive and get the directory to store the cache
+//   final appDocumentsDirectory = await getApplicationDocumentsDirectory();
+//   Hive.init(appDocumentsDirectory.path);
+
+//   // Open a Hive box for storing cache
+//   await Hive.openBox('HiveCacheStore');
+//   runApp(MyApp());
+// }
+
+
+
+
+
+// class MyMap extends StatefulWidget {
+//   const MyMap({super.key});
+
+//   @override
+//   State<MyMap> createState() => _MyMapState();
+// }
+
+// class _MyMapState extends State<MyMap> {
+//   // create the cache store as a field variable
+//   final Future<CacheStore> _cacheStoreFuture = _getCacheStore();
+
+//   /// Get the CacheStore as a Future. This method needs to be static so that it
+//   /// can be used to initialize a field variable.
+//   static Future<CacheStore> _getCacheStore() async {
+//     final dir = await getTemporaryDirectory();
+//     // Note, that Platform.pathSeparator from dart:io does not work on web,
+//     // import it from dart:html instead.
+//     return FileCacheStore('${dir.path}${Platform.pathSeparator}MapTiles');
+//   }
+
+//   @override
+//   Widget build(BuildContext context) {
+//     // show a loading screen when _cacheStore hasn't been set yet
+//     return FutureBuilder<CacheStore>(
+//       future: _cacheStoreFuture,
+//       builder: (context, snapshot) {
+//         if (snapshot.hasData) {
+//           final cacheStore = snapshot.data!;
+//           return FlutterMap(
+//             options: MapOptions(
+
+//             ),
+//             children: [
+//               TileLayer(
+//                 urlTemplate: "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+//                 tileProvider: CachedTileProvider(
+//                   // use the store for your CachedTileProvider instance
+//                   store: cacheStore,
+//                 ),
+//               ),
+//             ],
+//           );
+//         }
+//         if (snapshot.hasError) {
+//           return Center(child: Text(snapshot.error.toString()));
+//         }
+//         return const Center(child: CircularProgressIndicator());
+//       },
+//     );
+//   }
+// }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// class MyApp extends StatelessWidget {
+//   const MyApp({super.key});
+
+//   @override
+//   Widget build(BuildContext context) {
+//     return const MaterialApp(
+//       debugShowCheckedModeBanner: false,
+//       home: Scaffold(
+//         // appBar: AppBar(
+//         //   title: const Text('OSM with Current Location'),
+//         //   centerTitle: true,
+//         // ),
+//         body: MyMap(),
+//       ),
+//     );
+//   }
+// }
+
+// class OSMMap extends StatefulWidget {
+//   const OSMMap({super.key});
+
+//   @override
+//   State<OSMMap> createState() => _OSMMapState();
+// }
+
+// class _OSMMapState extends State<OSMMap> {
+//   LatLng? currentLocation;
+//   List<LatLng> routePoints = [];
+//   final TextEditingController _searchController = TextEditingController();
+//   String _searchText = '';
+//   final MapController _mapController =
+//       MapController(); // Khai báo MapController
+
+//   @override
+//   void initState() {
+//     super.initState();
+//     _checkLocationPermission();
+//     _startTrackingLocation();
+//   }
+
+
+
+//   // Kiểm tra quyền truy cập vị trí
+//   Future<void> _checkLocationPermission() async {
+//     var status = await Permission.location.request();
+//     if (status.isGranted) {
+//       _getCurrentLocation();
+//     } else {
+//       // Hiển thị yêu cầu quyền nếu chưa có
+//       ScaffoldMessenger.of(context).showSnackBar(
+//         const SnackBar(content: Text("Location permission is required")),
+//       );
+//     }
+//   }
+
+//   // Lấy vị trí hiện tại
+//   Future<void> _getCurrentLocation() async {
+//     try {
+//       Position position = await Geolocator.getCurrentPosition(
+//         desiredAccuracy: LocationAccuracy.high,
+//       );
+//       setState(() {
+//         currentLocation = LatLng(position.latitude, position.longitude);
+//         if (currentLocation != null) {
+//           _mapController.move(
+//               currentLocation!, 15.0); // Di chuyển bản đồ về vị trí hiện tại
+//         }
+//       });
+//     } catch (e) {
+//       print("Error getting location: $e");
+//     }
+//   }
+
+//   Future<void> fetchRoute(String start, String end) async {
+//     String url =
+//         'https://router.project-osrm.org/route/v1/driving/$start;$end?overview=full&geometries=geojson';
+
+//     try {
+//       final response = await http.get(Uri.parse(url));
+
+//       if (response.statusCode == 200) {
+//         final data = jsonDecode(response.body);
+//         final geometry = data['routes'][0]['geometry']['coordinates'];
+
+//         setState(() {
+//           // Chuyển đổi danh sách tọa độ GeoJSON sang danh sách LatLng
+//           routePoints = geometry
+//               .map<LatLng>((point) => LatLng(point[1], point[0]))
+//               .toList();
+//         });
+//       } else {
+//         debugPrint('Error: ${response.statusCode}');
+//       }
+//     } catch (e) {
+//       debugPrint('Error fetching route: $e');
+//     }
+//   }
+
+//   bool searching = false;
+//   final dio = Dio()
+//     ..options.headers['User-Agent'] =
+//         'YourAppName/1.0 (your-email@example.com)';
+
+//   Future<void> searchLocation(String query) async {
+//     searching = true;
+
+//     try {
+//       final response = await dio.get(
+//         'https://nominatim.openstreetmap.org/search',
+//         queryParameters: {
+//           'format': 'json',
+//           'q': query,
+//         },
+//       );
+
+//       if (response.statusCode == 200) {
+//         final data = response.data;
+
+//         if (data.isNotEmpty) {
+//           double latitude = double.parse(data[0]['lat']);
+//           double longitude = double.parse(data[0]['lon']);
+//           print('Latitude: $latitude, Longitude: $longitude');
+
+//           setState(() {
+//             search_location = LatLng(latitude, longitude);
+//           });
+
+//           _mapController.move(
+//             search_location!,
+//             10.0, // Zoom level
+//           );
+//         } else {
+//           print("No results found");
+//         }
+//       } else {
+//         throw Exception('Failed to load location: ${response.statusCode}');
+//       }
+//     } catch (e) {
+//       print('Error fetching location: $e');
+//     }
+//   }
+
+//   // Future<void> searchLocation(String query) async {
+//   //   searching = true;
+//   //   final response = await http.get(
+//   //     Uri.parse(
+//   //         'https://nominatim.openstreetmap.org/search?format=json&q=$query'),
+//   //   );
+
+//   //   if (response.statusCode == 200) {
+//   //     var data = json.decode(response.body);
+//   //     if (data.isNotEmpty) {
+//   //       double latitude = double.parse(data[0]['lat']);
+//   //       double longitude = double.parse(data[0]['lon']);
+//   //       print('Latitude: $latitude, Longitude: $longitude');
+//   //       setState(() {
+//   //         search_location = LatLng(latitude, longitude);
+//   //       });
+//   //       _mapController.move(
+//   //           search_location!, 10.0); // Di chuyển bản đồ về vị trí hiện tại
+//   //     } else {
+//   //       print("No results found");
+//   //     }
+//   //   } else {
+//   //     throw Exception('Failed to load location');
+//   //   }
+//   // }
+
+//   Future<String> getPath() async {
+//     final cacheDirectory = await getTemporaryDirectory();
+//     return cacheDirectory.path;
+//   }
+
+//   LatLng init_location = const LatLng(21.0285, 105.8542);
+//   LatLng? search_location;
+//   @override
+//   Widget build(BuildContext context) {
+//     return Stack(
+//       children: [
+//         FlutterMap(
+//           mapController: _mapController,
+//           options: MapOptions(
+//               initialCenter: init_location, // Hà Nội
+//               initialZoom: 8.0,
+//               keepAlive: true),
+//           children: [
+//             TileLayer(
+//               urlTemplate: "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+//               subdomains: const ['a', 'b', 'c'],
+//               //tileProvider: FMTC.instance('myCacheStore').getTileProvider(),
+//               // tileProvider: CachedTileProvider(
+//               //     // maxStale keeps the tile cached for the given Duration and
+//               //     // tries to revalidate the next time it gets requested
+//               //     maxStale: const Duration(days: 30),
+//               //     //store: HiveCacheStore()
+//               //     // HiveCacheStore(
+//               //     //   path,
+//               //     //   hiveBoxName: 'HiveCacheStore',
+//               //     // ),
+//               //     ),
+//             ),
+//             if (currentLocation != null)
+//               MarkerLayer(
+//                 markers: [
+//                   Marker(
+//                     width: 80.0,
+//                     height: 80.0,
+//                     point: currentLocation!,
+//                     child: const Icon(
+//                       Icons.location_pin,
+//                       color: Colors.red,
+//                       size: 40,
+//                     ),
+//                   ),
+//                 ],
+//               ),
+//             if (search_location != null)
+//               MarkerLayer(
+//                 markers: [
+//                   Marker(
+//                     width: 80.0,
+//                     height: 80.0,
+//                     point: search_location!,
+//                     child: const Icon(
+//                       Icons.circle,
+//                       color: Colors.blue,
+//                       size: 40,
+//                     ),
+//                   ),
+//                 ],
+//               ),
+//             if (routePoints.isNotEmpty)
+//               PolylineLayer(
+//                 polylines: [
+//                   Polyline(
+//                     points: routePoints,
+//                     color: Colors.green,
+//                     strokeWidth: 5.0,
+//                   ),
+//                 ],
+//               ),
+//           ],
+//         ),
+
+//         if (currentLocation == null)
+//           const Center(
+//             child: CircularProgressIndicator(),
+//           ),
+//         Padding(
+//           padding: const EdgeInsets.symmetric(vertical: 50, horizontal: 20),
+//           child: MySearchBar(
+//             controller: _searchController,
+//             onChanged: (text) {
+//               setState(() {
+//                 _searchText = text;
+//               });
+//             },
+//           ),
+//         ),
+//         Padding(
+//             padding: const EdgeInsets.symmetric(vertical: 50, horizontal: 20),
+//             child: Align(
+//               alignment: Alignment.bottomLeft,
+//               child: FloatingActionButton(
+//                   onPressed: () {
+//                     searchLocation(_searchController.text);
+//                   },
+//                   child: const Icon(Icons.find_in_page)),
+//             )),
+//         Padding(
+//             padding: const EdgeInsets.symmetric(vertical: 50, horizontal: 20),
+//             child: Align(
+//               alignment: Alignment.bottomRight,
+//               child: FloatingActionButton(
+//                   onPressed: () {
+//                     fetchRoute(
+//                         "${currentLocation!.longitude.toString()},${currentLocation!.latitude.toString()}",
+//                         "${search_location!.longitude.toString()},${search_location!.latitude.toString()}");
+//                   },
+//                   child: const Icon(Icons.location_searching)),
+//             )),
+//         // Padding(
+//         //     padding: EdgeInsets.symmetric(vertical: 50, horizontal: 20),
+//         //     child: Align(
+//         //       alignment: Alignment.bottomCenter,
+//         //       child: FloatingActionButton(
+//         //           onPressed: () {}, child: Icon(Icons.location_searching)),
+//         //     )),
+//         // Padding(
+//         //     padding: EdgeInsets.symmetric(vertical: 150, horizontal: 20),
+//         //     child: Align(
+//         //       alignment: Alignment.bottomLeft,
+//         //       child: FloatingActionButton(
+//         //           onPressed: () {
+//         //             setState(() {
+//         //               currentLocation = LatLng(
+//         //                   currentLocation!.latitude + 0.001,
+//         //                   currentLocation!.longitude);
+//         //             });
+//         //           },
+//         //           child: Icon(Icons.location_searching)),
+//         //     )),
+//         Padding(
+//             padding: const EdgeInsets.symmetric(vertical: 150, horizontal: 20),
+//             child: Align(
+//               alignment: Alignment.bottomRight,
+//               child: FloatingActionButton(
+//                   onPressed: () {
+//                     getSuggestions("Ha Noi");
+//                   },
+//                   child: const Text("Find Loc")),
+//             )),
+//         Padding(
+//             padding: const EdgeInsets.symmetric(vertical: 250, horizontal: 20),
+//             child: Align(
+//                 alignment: Alignment.bottomRight,
+//                 child: Container(
+//                   decoration: const BoxDecoration(color: Colors.white),
+//                   child:
+//                       Text("${(currentSpeed.toStringAsFixed(1) ?? "0")}km/h"),
+//                 ))),
+//       ],
+//     );
+//   }
+
+//   Position? _position;
+//   StreamSubscription? _positionStream;
+
+//   Position? _lastPosition; // Lưu vị trí trước đó
+//   DateTime? _lastUpdateTime; // Lưu thời gian trước đó
+//   double currentSpeed = 0; // Biến lưu vận tốc
+
+//   void _startTrackingLocation() {
+//     _positionStream = Geolocator.getPositionStream(
+//         locationSettings: const LocationSettings(
+//       accuracy: LocationAccuracy.best,
+//       distanceFilter: 5, // Cập nhật mỗi 5 mét
+//     )).listen((Position position) {
+//       final now = DateTime.now(); // Lấy thời gian hiện tại
+
+//       setState(() {
+//         _position = position;
+//         currentLocation = LatLng(position.latitude, position.longitude);
+
+//         // Tính vận tốc
+//         if (_lastPosition != null && _lastUpdateTime != null) {
+//           final distanceInMeters = Geolocator.distanceBetween(
+//             _lastPosition!.latitude,
+//             _lastPosition!.longitude,
+//             position.latitude,
+//             position.longitude,
+//           );
+
+//           final timeInSeconds =
+//               now.difference(_lastUpdateTime!).inMilliseconds / 1000;
+
+//           currentSpeed = distanceInMeters / timeInSeconds; // m/s
+//           print('Vận tốc: ${currentSpeed.toStringAsFixed(2)} m/s');
+//           _checkRouteDeviation();
+//         }
+
+//         // Lưu lại vị trí và thời gian
+//         _lastPosition = position;
+//         _lastUpdateTime = now;
+//       });
+
+//       // Di chuyển bản đồ
+//       _mapController.move(currentLocation!, 15.0);
+//     });
+//   }
+
+//   double maxDeviationDistance = 50; // Ngưỡng khoảng cách tối đa (mét)
+//   void _checkRouteDeviation() {
+//     if (_position == null || routePoints.isEmpty) return;
+
+//     // Tính khoảng cách từ vị trí hiện tại đến từng điểm trên tuyến đường
+//     final currentLatLng = LatLng(_position!.latitude, _position!.longitude);
+//     const distanceCalculator = Distance();
+//     double? minDistance;
+
+//     for (var point in routePoints) {
+//       double distance = distanceCalculator(currentLatLng, point);
+//       if (minDistance == null || distance < minDistance) {
+//         minDistance = distance;
+//       }
+//     }
+
+//     // Nếu khoảng cách lớn hơn ngưỡng, cập nhật lại route
+//     if (minDistance != null && minDistance > maxDeviationDistance) {
+//       debugPrint("You are off route! Recalculating...");
+//       String currentPosition = "${_position!.longitude},${_position!.latitude}";
+//       String destination =
+//           "${routePoints.last.longitude},${routePoints.last.latitude}";
+//       fetchRoute(currentPosition, destination);
+//     }
+//   }
+
+//   // void _checkRouteUpdate() {
+//   //   if (routeCoordinates.isNotEmpty && _position != null) {
+//   //     LatLng current = LatLng(_position!.latitude, _position!.longitude);
+//   //     bool isOutOfRoute = !_isPointNearRoute(current, routeCoordinates);
+
+//   //     if (isOutOfRoute) {
+//   //       // Cập nhật lại tuyến đường nếu người dùng ra khỏi tuyến đường
+//   //       LatLng destination = routeCoordinates.last; // Đích đến
+//   //       _getRoute(current, destination); // Cập nhật lại tuyến đường
+//   //     }
+//   //   }
+//   // }
+
+//   Future<List<Map<String, dynamic>>> getSuggestions(String query) async {
+//     final String url =
+//         'https://nominatim.openstreetmap.org/search?q=$query&format=json&limit=10';
+
+//     try {
+//       final response = await http.get(Uri.parse(url));
+
+//       if (response.statusCode == 200) {
+//         List<dynamic> data = json.decode(response.body);
+
+//         // Trả về danh sách gợi ý
+//         return data.map((item) {
+//           return {
+//             'name': item['display_name'],
+//             'lat': item['lat'],
+//             'lon': item['lon'],
+//           };
+//         }).toList();
+//       } else {
+//         throw Exception(
+//             'Failed to fetch suggestions. Status code: ${response.statusCode}');
+//       }
+//     } catch (e) {
+//       print('Error: $e');
+//       return [];
+//     }
+//   }
+// }
