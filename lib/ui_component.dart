@@ -14,6 +14,8 @@ BoxDecoration my_decoration = BoxDecoration(
 );
 
 class FadingTextLoading extends StatefulWidget {
+  const FadingTextLoading({super.key});
+
   @override
   _FadingTextLoadingState createState() => _FadingTextLoadingState();
 }
