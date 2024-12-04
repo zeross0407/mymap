@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:hive/hive.dart';
 import 'package:http/http.dart' as http;
 
 // Hàm lấy các gợi ý tìm kiếm từ OpenStreetMap
@@ -35,4 +36,18 @@ Future<List<Map<String, dynamic>>> getSuggestions(String query) async {
     print('Error: $e');
     return [];
   }
+}
+
+Future<void> deleteItemByTitle(String name, Box box) async {
+  // Duyệt qua tất cả các key và items để tìm mục phù hợp
+  final keyToDelete = box.keys.firstWhere(
+    (key) =>
+        box.get(key)?.name ==
+        name, // Tìm item có `title` giống giá trị truyền vào
+    orElse: () => null, // Nếu không tìm thấy, trả về null
+  );
+
+  if (keyToDelete != null) {
+    await box.delete(keyToDelete); // Xóa item bằng key
+  } else {}
 }

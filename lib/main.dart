@@ -4,8 +4,11 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:hive/hive.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:mymap/Repository.dart';
+import 'package:mymap/model.dart';
 import 'package:mymap/search_bar.dart';
 import 'package:mymap/ui_component.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -16,11 +19,16 @@ import 'package:flutter_map_cache/flutter_map_cache.dart';
 import 'package:dio_cache_interceptor/dio_cache_interceptor.dart';
 import 'package:dio_cache_interceptor_file_store/dio_cache_interceptor_file_store.dart';
 
+late Box<Search_Model> search_box;
+
 void main() async {
   // Đảm bảo các binding của Flutter đã được khởi tạo.
   WidgetsFlutterBinding.ensureInitialized();
-
+  await Hive.initFlutter();
+  Hive.registerAdapter(SearchModelAdapter());
   // Chạy ứng dụng với widget MyMap.
+  search_box = await Hive.openBox<Search_Model>('my_box');
+
   runApp(const MyMap());
 }
 
@@ -48,12 +56,60 @@ class _MyMapState extends State<MyMap> {
 
   LatLng? start_location;
   List<LatLng> routePoints = [];
-  final TextEditingController _searchController = TextEditingController();
+  late TextEditingController _searchController;
 
   final MapController _mapController = MapController();
+  final FocusNode _focusNode = FocusNode();
+  bool history_mode = false;
 
   @override
   void initState() {
+    _focusNode.addListener(() async {
+      if (_focusNode.hasFocus) {
+        if (_searchController.text == "" && _focusNode.hasFocus) {
+          search_data = [];
+          List<Search_Model> data_list = await search_box.values.toList();
+          setState(() {
+            for (var i = 0; i < data_list.length; i++) {
+              search_data.add({
+                'lat': data_list[i].latitude,
+                'lon': data_list[i].longitude,
+                'name': data_list[i].name,
+              });
+              history_mode = true;
+            }
+          });
+        } else {
+          search_data.clear();
+        }
+      } else {}
+    });
+
+    _searchController = TextEditingController()
+      ..addListener(
+        () async {
+          if (_searchController.text != '') {
+            setState(() {
+              search_data.clear();
+              history_mode = false;
+            });
+          } else {
+            history_mode = true;
+            search_data = [];
+            List<Search_Model> data_list = await search_box.values.toList();
+            setState(() {
+              for (var i = 0; i < data_list.length; i++) {
+                search_data.add({
+                  'lat': data_list[i].latitude,
+                  'lon': data_list[i].longitude,
+                  'name': data_list[i].name,
+                });
+                history_mode = true;
+              }
+            });
+          }
+        },
+      );
     super.initState();
   }
 
@@ -279,6 +335,7 @@ class _MyMapState extends State<MyMap> {
                   child: Column(
                     children: [
                       MySearchBar(
+                        focusNode: _focusNode,
                         controller: _searchController,
                         start_Search: (p0) async {
                           setState(() {
@@ -287,6 +344,7 @@ class _MyMapState extends State<MyMap> {
                           search_data = await getSuggestions(p0);
                           setState(() {
                             is_loading = false;
+                            history_mode = false;
                           });
                         },
                       ),
@@ -315,6 +373,17 @@ class _MyMapState extends State<MyMap> {
                                           double.parse(search_data[index]
                                                   ["lon"]!
                                               .toString()));
+                                      //////////////////////
+                                      if (!history_mode) {
+                                        Search_Model model = Search_Model(
+                                            name: search_data[index]["name"]!,
+                                            latitude: search_data[index]
+                                                ["lat"]!,
+                                            longitude: search_data[index]
+                                                ["lon"]!);
+                                        await search_box.add(model);
+                                      }
+
                                       // hiển thị menu tùy chọn chức năng khi nhấn vào 1 kết quả tìm kiếm
                                       await showModalBottomSheet(
                                         context: context,
@@ -383,13 +452,49 @@ class _MyMapState extends State<MyMap> {
                                       search_data.clear();
                                     },
                                     child: Container(
-                                        alignment: Alignment.centerLeft,
-                                        margin: const EdgeInsets.symmetric(
-                                            vertical: 10),
-                                        padding: const EdgeInsets.symmetric(
-                                            vertical: 10, horizontal: 20),
-                                        child: Text(search_data[index]["name"]!
-                                            .toString())),
+                                      alignment: Alignment.centerLeft,
+                                      margin: const EdgeInsets.symmetric(
+                                          vertical: 10),
+                                      padding: const EdgeInsets.symmetric(
+                                          vertical: 10, horizontal: 20),
+                                      child: Row(
+                                        crossAxisAlignment: CrossAxisAlignment
+                                            .start, // Đặt căn chỉnh theo chiều dọc
+                                        children: [
+                                          Expanded(
+                                            child: Text(
+                                              search_data[index]["name"]!
+                                                  .toString(),
+                                              style: const TextStyle(
+                                                  fontSize:
+                                                      16), // Tuỳ chỉnh style nếu cần
+                                              softWrap:
+                                                  true, // Cho phép xuống dòng khi tràn
+                                              overflow: TextOverflow
+                                                  .visible, // Không cắt chữ
+                                            ),
+                                          ),
+                                          if (history_mode)
+                                            Align(
+                                              alignment: Alignment
+                                                  .topRight, // Đặt icon căn về góc phải
+                                              child: GestureDetector(
+                                                  onTap: () async {
+                                                    await deleteItemByTitle(
+                                                        search_data[index]
+                                                                ["name"]!
+                                                            .toString(),
+                                                        search_box);
+                                                    setState(() {
+                                                      search_data
+                                                          .removeAt(index);
+                                                    });
+                                                  },
+                                                  child: Icon(Icons.delete)),
+                                            ),
+                                        ],
+                                      ),
+                                    ),
                                   );
                                 },
                               ),

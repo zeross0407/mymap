@@ -2,10 +2,15 @@ import 'package:flutter/material.dart';
 
 class MySearchBar extends StatelessWidget {
   final TextEditingController controller;
-
+  final FocusNode focusNode; // Nhận FocusNode từ ngoài vào
   final Function(String) start_Search;
-  const MySearchBar(
-      {super.key, required this.controller, required this.start_Search});
+
+  const MySearchBar({
+    super.key,
+    required this.controller,
+    required this.focusNode,
+    required this.start_Search,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -16,23 +21,25 @@ class MySearchBar extends StatelessWidget {
         color: Colors.white,
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.2), // Màu bóng với độ trong suốt
-            spreadRadius: 1, // Độ lan của bóng
-            blurRadius: 10, // Độ mờ của bóng
-            offset: const Offset(0, 4), // Dịch chuyển bóng (x, y)
+            color: Colors.black.withOpacity(0.2),
+            spreadRadius: 1,
+            blurRadius: 10,
+            offset: const Offset(0, 4),
           ),
         ],
       ),
       child: Row(
         children: [
           GestureDetector(
-              onTap: () {
-                start_Search(controller.text);
-              },
-              child: const Icon(Icons.search, color: Colors.grey)),
+            onTap: () {
+              start_Search(controller.text);
+            },
+            child: const Icon(Icons.search, color: Colors.grey),
+          ),
           const SizedBox(width: 8),
           Expanded(
             child: TextField(
+              focusNode: focusNode, // Gắn FocusNode từ ngoài vào đây
               controller: controller,
               onSubmitted: (value) {
                 start_Search(value);
