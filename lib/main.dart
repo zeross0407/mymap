@@ -250,7 +250,11 @@ class _MyMapState extends State<MyMap> {
                   // Cấu hình các tùy chọn cho bản đồ, như sự kiện khi bản đồ được sẵn sàng.
                   options: MapOptions(
                     // Xử lý sự kiện khi người dùng nhấn vào bản đồ (tapPosition và point là tọa độ nhấn).
-                    onTap: (tapPosition, point) {},
+                    onTap: (tapPosition, point) {
+                      setState(() {
+                        history_mode = !history_mode;
+                      });
+                    },
 
                     // Khi bản đồ đã sẵn sàng, kiểm tra quyền truy cập vị trí và bắt đầu theo dõi vị trí.
                     onMapReady: () {
@@ -351,156 +355,149 @@ class _MyMapState extends State<MyMap> {
                       const SizedBox(
                         height: 10,
                       ),
-                      if (!search_data.isEmpty)
-                        Container(
-                          height: 300,
-                          width: double.infinity,
-                          decoration: my_decoration,
-                          child: SingleChildScrollView(
-                            child: Column(
-                              children: List.generate(
-                                search_data.length,
-                                (index) {
-                                  return GestureDetector(
-                                    onTap: () async {
-                                      setState(() {
-                                        routePoints.clear();
-                                      });
-                                      LatLng location = LatLng(
-                                          double.parse(search_data[index]
-                                                  ["lat"]!
-                                              .toString()),
-                                          double.parse(search_data[index]
-                                                  ["lon"]!
-                                              .toString()));
-                                      //////////////////////
-                                      if (!history_mode) {
-                                        Search_Model model = Search_Model(
-                                            name: search_data[index]["name"]!,
-                                            latitude: search_data[index]
-                                                ["lat"]!,
-                                            longitude: search_data[index]
-                                                ["lon"]!);
-                                        await search_box.add(model);
-                                      }
+                      //if (!search_data.isEmpty)
+                      AnimatedContainer(
+                        duration: Duration(milliseconds: 400),
+                        height:
+                            (!search_data.isEmpty && history_mode) ? 300 : 0,
+                        width: double.infinity,
+                        decoration: my_decoration,
+                        child: SingleChildScrollView(
+                          child: Column(
+                            children: List.generate(
+                              search_data.length,
+                              (index) {
+                                return GestureDetector(
+                                  onTap: () async {
+                                    setState(() {
+                                      routePoints.clear();
+                                    });
+                                    LatLng location = LatLng(
+                                        double.parse(search_data[index]["lat"]!
+                                            .toString()),
+                                        double.parse(search_data[index]["lon"]!
+                                            .toString()));
+                                    //////////////////////
+                                    if (!history_mode) {
+                                      Search_Model model = Search_Model(
+                                          name: search_data[index]["name"]!,
+                                          latitude: search_data[index]["lat"]!,
+                                          longitude: search_data[index]
+                                              ["lon"]!);
+                                      await search_box.add(model);
+                                    }
 
-                                      // hiển thị menu tùy chọn chức năng khi nhấn vào 1 kết quả tìm kiếm
-                                      await showModalBottomSheet(
-                                        context: context,
-                                        builder: (BuildContext context) {
-                                          return Wrap(
-                                            children: [
-                                              Container(
-                                                padding:
-                                                    const EdgeInsets.all(12.0),
-                                                child: ListView(
-                                                  shrinkWrap: true,
-                                                  children: [
-                                                    ListTile(
-                                                      title: const Text(
-                                                          'Đi từ vị trí của bạn'),
-                                                      onTap: () async {
-                                                        Navigator.pop(context);
-                                                        setState(() {
-                                                          is_loading = true;
-                                                        });
-                                                        await _getCurrentLocation();
+                                    // hiển thị menu tùy chọn chức năng khi nhấn vào 1 kết quả tìm kiếm
+                                    await showModalBottomSheet(
+                                      context: context,
+                                      builder: (BuildContext context) {
+                                        return Wrap(
+                                          children: [
+                                            Container(
+                                              padding:
+                                                  const EdgeInsets.all(12.0),
+                                              child: ListView(
+                                                shrinkWrap: true,
+                                                children: [
+                                                  ListTile(
+                                                    title: const Text(
+                                                        'Đi từ vị trí của bạn'),
+                                                    onTap: () async {
+                                                      Navigator.pop(context);
+                                                      setState(() {
+                                                        is_loading = true;
+                                                      });
+                                                      await _getCurrentLocation();
+                                                      end_location = location;
+                                                      await fetchRoute(
+                                                          "${start_location!.longitude.toString()},${start_location!.latitude.toString()}",
+                                                          "${end_location!.longitude.toString()},${end_location!.latitude.toString()}");
+                                                      setState(() {
+                                                        search_data.clear();
+                                                        is_loading = false;
+                                                      });
+                                                    },
+                                                  ),
+                                                  ListTile(
+                                                    title: const Text(
+                                                        'Đặt làm vị trí bắt đầu'),
+                                                    onTap: () {
+                                                      setState(() {
+                                                        start_location =
+                                                            location;
+                                                      });
+                                                      _mapController.move(
+                                                          location, 10);
+
+                                                      Navigator.pop(context);
+                                                    },
+                                                  ),
+                                                  ListTile(
+                                                    title: const Text(
+                                                        'Đặt làm vị trí kết thúc'),
+                                                    onTap: () {
+                                                      setState(() {
                                                         end_location = location;
-                                                        await fetchRoute(
-                                                            "${start_location!.longitude.toString()},${start_location!.latitude.toString()}",
-                                                            "${end_location!.longitude.toString()},${end_location!.latitude.toString()}");
-                                                        setState(() {
-                                                          search_data.clear();
-                                                          is_loading = false;
-                                                        });
-                                                      },
-                                                    ),
-                                                    ListTile(
-                                                      title: const Text(
-                                                          'Đặt làm vị trí bắt đầu'),
-                                                      onTap: () {
-                                                        setState(() {
-                                                          start_location =
-                                                              location;
-                                                        });
-                                                        _mapController.move(
-                                                            location, 10);
-
-                                                        Navigator.pop(context);
-                                                      },
-                                                    ),
-                                                    ListTile(
-                                                      title: const Text(
-                                                          'Đặt làm vị trí kết thúc'),
-                                                      onTap: () {
-                                                        setState(() {
-                                                          end_location =
-                                                              location;
-                                                        });
-                                                        _mapController.move(
-                                                            location, 10);
-                                                        Navigator.pop(context);
-                                                      },
-                                                    ),
-                                                  ],
-                                                ),
+                                                      });
+                                                      _mapController.move(
+                                                          location, 10);
+                                                      Navigator.pop(context);
+                                                    },
+                                                  ),
+                                                ],
                                               ),
-                                            ],
-                                          );
-                                        },
-                                      );
-                                      search_data.clear();
-                                    },
-                                    child: Container(
-                                      alignment: Alignment.centerLeft,
-                                      margin: const EdgeInsets.symmetric(
-                                          vertical: 10),
-                                      padding: const EdgeInsets.symmetric(
-                                          vertical: 10, horizontal: 20),
-                                      child: Row(
-                                        crossAxisAlignment: CrossAxisAlignment
-                                            .start, // Đặt căn chỉnh theo chiều dọc
-                                        children: [
-                                          Expanded(
-                                            child: Text(
-                                              search_data[index]["name"]!
-                                                  .toString(),
-                                              style: const TextStyle(
-                                                  fontSize:
-                                                      16), // Tuỳ chỉnh style nếu cần
-                                              softWrap:
-                                                  true, // Cho phép xuống dòng khi tràn
-                                              overflow: TextOverflow
-                                                  .visible, // Không cắt chữ
                                             ),
+                                          ],
+                                        );
+                                      },
+                                    );
+                                    search_data.clear();
+                                  },
+                                  child: Container(
+                                    alignment: Alignment.centerLeft,
+                                    margin: const EdgeInsets.symmetric(
+                                        vertical: 10),
+                                    padding: const EdgeInsets.symmetric(
+                                        vertical: 10, horizontal: 20),
+                                    child: Row(
+                                      crossAxisAlignment: CrossAxisAlignment
+                                          .start, // Đặt căn chỉnh theo chiều dọc
+                                      children: [
+                                        Expanded(
+                                          child: Text(
+                                            search_data[index]["name"]!
+                                                .toString(),
+                                            style: const TextStyle(
+                                                fontSize:
+                                                    16), // Tuỳ chỉnh style nếu cần
+                                            softWrap:
+                                                true, // Cho phép xuống dòng khi tràn
+                                            overflow: TextOverflow
+                                                .visible, // Không cắt chữ
                                           ),
-                                          if (history_mode)
-                                            Align(
-                                              alignment: Alignment
-                                                  .topRight, // Đặt icon căn về góc phải
-                                              child: GestureDetector(
-                                                  onTap: () async {
-                                                    await deleteItemByTitle(
-                                                        search_data[index]
-                                                                ["name"]!
-                                                            .toString(),
-                                                        search_box);
-                                                    setState(() {
-                                                      search_data
-                                                          .removeAt(index);
-                                                    });
-                                                  },
-                                                  child: Icon(Icons.delete)),
-                                            ),
-                                        ],
-                                      ),
+                                        ),
+                                        if (history_mode)
+                                          GestureDetector(
+                                              onTap: () async {
+                                                await deleteItemByTitle(
+                                                    search_data[index]["name"]!
+                                                        .toString(),
+                                                    search_box);
+                                                setState(() {
+                                                  search_data.removeAt(index);
+                                                });
+                                              },
+                                              child: Center(
+                                                  child: Icon(Icons.delete))),
+                                      ],
                                     ),
-                                  );
-                                },
-                              ),
+                                  ),
+                                );
+                              },
                             ),
                           ),
                         ),
+                      ),
                       Expanded(child: Container())
                     ],
                   ),
@@ -513,6 +510,7 @@ class _MyMapState extends State<MyMap> {
                       child: Align(
                         alignment: Alignment.bottomRight,
                         child: FloatingActionButton(
+                            backgroundColor: Colors.green[200],
                             onPressed: () {
                               if (routePoints.isEmpty) {
                                 fetchRoute(
@@ -536,6 +534,7 @@ class _MyMapState extends State<MyMap> {
                     child: Align(
                       alignment: Alignment.bottomLeft,
                       child: FloatingActionButton(
+                        backgroundColor: Colors.blue[100],
                           onPressed: () {
                             _mapController.move(
                               start_location!,
@@ -557,6 +556,7 @@ class _MyMapState extends State<MyMap> {
                       child: Align(
                         alignment: Alignment.bottomCenter,
                         child: Container(
+                         
                           width: 150,
                           height: 50,
                           decoration: my_decoration,
@@ -578,7 +578,7 @@ class _MyMapState extends State<MyMap> {
                             padding: const EdgeInsets.symmetric(
                                 horizontal: 15, vertical: 10),
                             decoration: BoxDecoration(
-                              color: Colors.white,
+                              color: Colors.amber[100],
                               borderRadius: BorderRadius.circular(10),
                               boxShadow: [
                                 BoxShadow(
