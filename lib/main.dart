@@ -252,7 +252,8 @@ class _MyMapState extends State<MyMap> {
                     // Xử lý sự kiện khi người dùng nhấn vào bản đồ (tapPosition và point là tọa độ nhấn).
                     onTap: (tapPosition, point) {
                       setState(() {
-                        history_mode = !history_mode;
+                        //history_mode = !history_mode;
+                        _focusNode.unfocus();
                       });
                     },
 
@@ -355,11 +356,10 @@ class _MyMapState extends State<MyMap> {
                       const SizedBox(
                         height: 10,
                       ),
-                      //if (!search_data.isEmpty)
+                      //if (_focusNode.hasFocus)
                       AnimatedContainer(
                         duration: Duration(milliseconds: 400),
-                        height:
-                            (!search_data.isEmpty && history_mode) ? 300 : 0,
+                        height: (search_data.isNotEmpty) ? 300 : 0,
                         width: double.infinity,
                         decoration: my_decoration,
                         child: SingleChildScrollView(
@@ -534,7 +534,7 @@ class _MyMapState extends State<MyMap> {
                     child: Align(
                       alignment: Alignment.bottomLeft,
                       child: FloatingActionButton(
-                        backgroundColor: Colors.blue[100],
+                          backgroundColor: Colors.blue[100],
                           onPressed: () {
                             _mapController.move(
                               start_location!,
@@ -556,7 +556,6 @@ class _MyMapState extends State<MyMap> {
                       child: Align(
                         alignment: Alignment.bottomCenter,
                         child: Container(
-                         
                           width: 150,
                           height: 50,
                           decoration: my_decoration,
