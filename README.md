@@ -1,16 +1,18 @@
-# mymap
+# Ứng dụng Flutter Map với OSM API
 
-A new Flutter project.
+Ứng dụng Flutter tích hợp Flutter Map với OpenStreetMap (OSM) API để cung cấp các tính năng lập bản đồ tương tác.
 
-## Getting Started
+## Tính năng
+Hiển thị bản đồ tương tác bằng OSM.
+Chức năng thu phóng và di chuyển.
+Vị trí đánh dấu trên bản đồ.
+Tìm địa điểm (lưu lại lịch sử tìm kiếm)
+Tìm đường đi từ vị trí hiện tại (tự động đổi tuyến đường nếu đi lệch , focus vào vị trí hiện tại)
+Tìm đường đi giữa 2 vị trí
 
-This project is a starting point for a Flutter application.
+DEMO
+<p align="center">
+  <img src="lib/1.gif" alt="Pendulum Simulation" width="300">
+</p>
 
-A few resources to get you started if this is your first Flutter project:
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
