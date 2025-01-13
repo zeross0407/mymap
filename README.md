@@ -12,7 +12,7 @@ Tìm đường đi giữa 2 vị trí
 
 DEMO
 <p align="center">
-  <img src="lib/1.gif" alt="Pendulum Simulation" width="300">
+  <img src="lib/1.gif" alt="Pendulum Simulation">
 </p>
 
 
